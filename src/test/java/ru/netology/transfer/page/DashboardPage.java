@@ -54,7 +54,7 @@ public class DashboardPage {
         $("[data-test-id='amount'] input").setValue(String.valueOf(100));
         $("[data-test-id='from'] input").setValue("0000 0000 0000 0002");
         $("[data-test-id='action-transfer']").click();
-        $("[data-test-id='error-notification']").shouldBe(Condition.visible, Duration.ofSeconds(10)).shouldHave(Condition.text("Произошла ошибкаf"));
+        $("[data-test-id='error-notification']").shouldBe(Condition.visible, Duration.ofSeconds(10)).shouldHave(Condition.text("Произошла ошибка"));
         return new DashboardPage();
     }
 
