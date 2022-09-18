@@ -1,6 +1,7 @@
 package ru.netology.transfer.test;
 import com.codeborne.selenide.Configuration;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.netology.transfer.data.*;
@@ -13,86 +14,93 @@ public class MoneyTransferTest {
     @BeforeEach
     void setup() {
         open("http://localhost:9999");
+        var loginPage = new LoginPage();
+        var authInfo = DataHelper.getAuthInfo();
+        var verificationPage = loginPage.validLogin(authInfo);
+        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
+        verificationPage.validVerify(verificationCode);
         Configuration.holdBrowserOpen = true;
     }
 
     @Test
     public void shouldTransferMoneyHappyPath() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.moneyTransferFromSecondToFirstCard();
+        var dashboardPage = new DashboardPage();
+        int expectedFirstCardBalance = dashboardPage.getCardBalance("1")+2000;
+        int expectedSecondCardBalance = dashboardPage.getCardBalance("2")-2000;
+        dashboardPage.getMoneyTransferFromSecondToFirstCard();
+        var moneyTransferPage = new MoneyTransferPage();
+        moneyTransferPage.moneyTransfer(DataHelper.getCardInfo("2"), "2000");
+        int actualFirstCardBalance = dashboardPage.getCardBalance("1");
+        int actualSecondCardBalance = dashboardPage.getCardBalance("2");
+
+        Assertions.assertEquals(expectedFirstCardBalance, actualFirstCardBalance);
+        Assertions.assertEquals(expectedSecondCardBalance, actualSecondCardBalance);
     }
 
     @Test
-    public void  shouldTransferMoneyAnotherHappyPath() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.moneyTransferFromFirstToSecondCard();
-    }
+    public void shouldTransferMoneyAnotherHappyPath() {
+        var dashboardPage = new DashboardPage();
+        int expectedFirstCardBalance = dashboardPage.getCardBalance("1")-3000;
+        int expectedSecondCardBalance = dashboardPage.getCardBalance("2")+3000;
+        dashboardPage.getMoneyTransferFromFirstToSecondCard();
+        var moneyTransferPage = new MoneyTransferPage();
+        moneyTransferPage.moneyTransfer(DataHelper.getCardInfo("1"), "3000");
+        int actualFirstCardBalance = dashboardPage.getCardBalance("1");
+        int actualSecondCardBalance = dashboardPage.getCardBalance("2");
 
-    @Test
-    public void shouldCancelMoneyTransfer() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.cancelMoneyTransfer();
+        Assertions.assertEquals(expectedFirstCardBalance, actualFirstCardBalance);
+        Assertions.assertEquals(expectedSecondCardBalance, actualSecondCardBalance);
     }
 
     @Test
     public void shouldReloadBalance() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.reloadBalance();
+        var dashboardPage = new DashboardPage();
+        int expectedFirstCardBalance = dashboardPage.getCardBalance("1");
+        int expectedSecondCardBalance = dashboardPage.getCardBalance("2");
+        dashboardPage.reloadBalance();
+        int actualFirstCardBalance = dashboardPage.getCardBalance("1");
+        int actualSecondCardBalance = dashboardPage.getCardBalance("2");
+
+        Assertions.assertEquals(expectedFirstCardBalance, actualFirstCardBalance);
+        Assertions.assertEquals(expectedSecondCardBalance, actualSecondCardBalance);
     }
 
     @Test
-    public void shouldNotTransferFromSecondToInvalidNumberFirstCard() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.moneyTransferFromSecondToInvalidNumberFirstCard();
+    public void shouldCancelMoneyTransfer() {
+        var dashboardPage = new DashboardPage();
+        int expectedFirstCardBalance = dashboardPage.getCardBalance("1");
+        int expectedSecondCardBalance = dashboardPage.getCardBalance("2");
+        dashboardPage.getMoneyTransferFromSecondToFirstCard();
+        dashboardPage.cancelMoneyTransfer();
+        int actualFirstCardBalance = dashboardPage.getCardBalance("1");
+        int actualSecondCardBalance = dashboardPage.getCardBalance("2");
+
+        Assertions.assertEquals(expectedFirstCardBalance, actualFirstCardBalance);
+        Assertions.assertEquals(expectedSecondCardBalance, actualSecondCardBalance);
     }
 
     @Test
-    public void shouldNotTransferFromSecondToNoNumberFirstCard() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.moneyTransferFromSecondToNoNumberFirstCard();
+    public void shouldNotTransferMoneyIfCardNotSelected() {
+        var dashboardPage = new DashboardPage();
+        dashboardPage.getMoneyTransferFromSecondToFirstCard();
+        var moneyTransferPage = new MoneyTransferPage();
+        moneyTransferPage.moneyTransfer(DataHelper.getCardInfo(""), "2000");
+        moneyTransferPage.getError();
     }
 
     @Test
-    public void shouldNotTransferFromFirstToInvalidNumberSecondCard() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.moneyTransferFromFirstToInvalidNumberSecondCard();
-    }
+    public void shouldNotTransferMoneyAboveExistingValue() {
+        var dashboardPage = new DashboardPage();
+        String aboveBalance = String.valueOf(dashboardPage.getCardBalance("1") + 1000);
+        int expectedFirstCardBalance = dashboardPage.getCardBalance("1");
+        int expectedSecondCardBalance = dashboardPage.getCardBalance("2");
+        dashboardPage.getMoneyTransferFromFirstToSecondCard();
+        var moneyTransferPage = new MoneyTransferPage();
+        moneyTransferPage.moneyTransfer(DataHelper.getCardInfo("1"), aboveBalance);
+        int actualFirstCardBalance = dashboardPage.getCardBalance("1");
+        int actualSecondCardBalance = dashboardPage.getCardBalance("2");
 
-    @Test
-    public void shouldNotTransferFromFirstToNoNumberSecondCard() {
-        var loginPage = new LoginPage();
-        var authInfo = DataHelper.getAuthInfo();
-        var verificationPage = loginPage.validLogin(authInfo);
-        var verificationCode = DataHelper.getVerificationCodeFor(authInfo);
-        verificationPage.validVerify(verificationCode);
-        var DashboardPage = ru.netology.transfer.page.DashboardPage.moneyTransferFromFirstToNoNumberSecondCard();
+        Assertions.assertNotEquals(expectedFirstCardBalance, actualFirstCardBalance);
+        Assertions.assertNotEquals(expectedSecondCardBalance, actualSecondCardBalance);
     }
 }

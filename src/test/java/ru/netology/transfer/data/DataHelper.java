@@ -3,7 +3,6 @@ package ru.netology.transfer.data;
 import lombok.Value;
 
 public class DataHelper {
-    public static DataHelper.CardInfo CardInfo;
 
     private DataHelper() {
     }
@@ -29,20 +28,17 @@ public class DataHelper {
 
     @Value
     public static class CardInfo {
-        private String Number;
-        private int Balance;
-        private String Id;
+        String number;
     }
 
-    public static CardInfo getFirstCardInfo() {
-        return new CardInfo("5559 0000 0000 0001",
-                10000,
-                "92df3f1c-a033-48e6-8390-206f6b1f56c0");
-    }
-
-    public static CardInfo getSecondCardInfo() {
-        return new CardInfo("5559 0000 0000 0002",
-                10000,
-                "0f3f5c2a-249e-4c3d-8287-09f7a039391d");
+    public static CardInfo getCardInfo (String id) {
+        if (id.equals("1")) {
+            return new CardInfo("5559 0000 0000 0001");
+        }
+        if (id.equals("2")) {
+            return new CardInfo("5559 0000 0000 0002");
+        } else {
+            return new CardInfo("5559 0000 0000 0000");
+        }
     }
 }

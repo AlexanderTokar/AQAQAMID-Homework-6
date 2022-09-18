@@ -8,11 +8,18 @@ import ru.netology.transfer.data.DataHelper;
 
 import java.time.Duration;
 
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
 public class DashboardPage {
     private SelenideElement heading = $("[data-test-id='dashboard']");
+    private SelenideElement firstCard = $("[data-test-id='92df3f1c-a033-48e6-8390-206f6b1f56c0']");
+    private SelenideElement secondCard = $("[data-test-id='0f3f5c2a-249e-4c3d-8287-09f7a039391d']");
+    private ElementsCollection depositButton = $$("[data-test-id='action-deposit']");
+    private SelenideElement reloadButton = $("[data-test-id='action-reload']");
+    private SelenideElement cancelButton = $("[data-test-id='action-cancel']");
+
     private static final ElementsCollection cards = $$(".list__item div");
     private static final String balanceStart = "баланс: ";
     private static final String balanceFinish = " р.";
@@ -21,80 +28,31 @@ public class DashboardPage {
         heading.shouldBe(Condition.visible);
     }
 
-    public static int getCardBalance (String id) {
-        String cardBalance = String.valueOf(cards.findBy(Condition.attribute("data-test-id")));
+    public int getCardBalance(String id) {
+        String cardBalance = cards.findBy(text(DataHelper.getCardInfo(id).getNumber().substring(16))).getText();
         return extractBalance(cardBalance);
     }
 
-    public static int extractBalance(String cardBalance) {
+    private int extractBalance(String cardBalance) {
         val start = cardBalance.indexOf(balanceStart);
         val finish = cardBalance.indexOf(balanceFinish);
         val value = cardBalance.substring(start + balanceStart.length(), finish);
         return Integer.parseInt(value);
     }
 
-    public static DashboardPage moneyTransferFromSecondToFirstCard() {
-        $$("[data-test-id='action-deposit']").first().click();
-        $("[data-test-id='amount'] input").setValue(String.valueOf(100));
-        $("[data-test-id='from'] input").setValue(DataHelper.getSecondCardInfo().getNumber());
-        $("[data-test-id='action-transfer']").click();
-        return new DashboardPage();
+    public void getMoneyTransferFromSecondToFirstCard() {
+        depositButton.first().click();
     }
 
-    public static DashboardPage moneyTransferFromFirstToSecondCard() {
-        $$("[data-test-id='action-deposit']").last().click();
-        $("[data-test-id='amount'] input").setValue(String.valueOf(100));
-        $("[data-test-id='from'] input").setValue(DataHelper.getFirstCardInfo().getNumber());
-        $("[data-test-id='action-transfer']").click();
-        return new DashboardPage();
+    public void getMoneyTransferFromFirstToSecondCard() {
+        depositButton.last().click();
     }
 
-    public static DashboardPage moneyTransferFromSecondToInvalidNumberFirstCard() {
-        $$("[data-test-id='action-deposit']").first().click();
-        $("[data-test-id='amount'] input").setValue(String.valueOf(100));
-        $("[data-test-id='from'] input").setValue("0000 0000 0000 0002");
-        $("[data-test-id='action-transfer']").click();
-        $("[data-test-id='error-notification']").shouldBe(Condition.visible, Duration.ofSeconds(10)).shouldHave(Condition.text("Произошла ошибка"));
-        return new DashboardPage();
+    public void reloadBalance() {
+        reloadButton.click();
     }
 
-    public static DashboardPage moneyTransferFromSecondToNoNumberFirstCard() {
-        $$("[data-test-id='action-deposit']").first().click();
-        $("[data-test-id='amount'] input").setValue(String.valueOf(100));
-        $("[data-test-id='from'] input").setValue("");
-        $("[data-test-id='action-transfer']").click();
-        $("[data-test-id='error-notification']").shouldBe(Condition.visible, Duration.ofSeconds(10)).shouldHave(Condition.text("Произошла ошибка"));
-        return new DashboardPage();
-    }
-
-    public static DashboardPage moneyTransferFromFirstToInvalidNumberSecondCard() {
-        $$("[data-test-id='action-deposit']").last().click();
-        $("[data-test-id='amount'] input").setValue(String.valueOf(100));
-        $("[data-test-id='from'] input").setValue("0000 0000 0000 0001");
-        $("[data-test-id='action-transfer']").click();
-        $("[data-test-id='error-notification']").shouldBe(Condition.visible, Duration.ofSeconds(10)).shouldHave(Condition.text("Произошла ошибка"));
-        return new DashboardPage();
-    }
-
-    public static DashboardPage moneyTransferFromFirstToNoNumberSecondCard() {
-        $$("[data-test-id='action-deposit']").last().click();
-        $("[data-test-id='amount'] input").setValue(String.valueOf(100));
-        $("[data-test-id='from'] input").setValue("");
-        $("[data-test-id='action-transfer']").click();
-        $("[data-test-id='error-notification']").shouldBe(Condition.visible, Duration.ofSeconds(10)).shouldHave(Condition.text("Произошла ошибка"));
-        return new DashboardPage();
-    }
-
-    public static DashboardPage cancelMoneyTransfer() {
-        $$("[data-test-id='action-deposit']").last().click();
-        $("[data-test-id='amount'] input").setValue(String.valueOf(100));
-        $("[data-test-id='from'] input").setValue(DataHelper.getFirstCardInfo().getNumber());
-        $("[data-test-id='action-cancel']").click();
-        return new DashboardPage();
-    }
-
-    public static DashboardPage reloadBalance() {
-        $("[data-test-id='action-reload']").click();
-        return new DashboardPage();
+    public void cancelMoneyTransfer() {
+        cancelButton.click();
     }
 }
