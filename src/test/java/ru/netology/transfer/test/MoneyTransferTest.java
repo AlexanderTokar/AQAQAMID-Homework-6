@@ -97,10 +97,7 @@ public class MoneyTransferTest {
         dashboardPage.getMoneyTransferFromFirstToSecondCard();
         var moneyTransferPage = new MoneyTransferPage();
         moneyTransferPage.moneyTransfer(DataHelper.getCardInfo("1"), aboveBalance);
-        int actualFirstCardBalance = dashboardPage.getCardBalance("1");
-        int actualSecondCardBalance = dashboardPage.getCardBalance("2");
-
-        Assertions.assertNotEquals(expectedFirstCardBalance, actualFirstCardBalance);
-        Assertions.assertNotEquals(expectedSecondCardBalance, actualSecondCardBalance);
+        moneyTransferPage.getError(); // здесь должно появляться сообщение об ошибке, т.к. нельзя перевести денег больше, чем есть на счете.
+        // Тест падает
     }
 }
